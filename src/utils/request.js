@@ -7,7 +7,7 @@ console.log('BASE_API', process.env.BASE_API)
 // 创建axios实例
 const service = axios.create({
   baseURL: process.env.BASE_API, // api的base_url
-  timeout: 500000 // 请求超时时间
+  timeout: 50000 // 请求超时时间
 })
 
 // request拦截器
@@ -104,7 +104,7 @@ export function spiderGet(url, params) {
 }
 
 export function spiderDelete(url, params) {
-  console.log('spiderGet params', params)
+  console.log('spiderDelete params', params)
   return service({
     url: url,
     method: 'delete',
@@ -114,11 +114,11 @@ export function spiderDelete(url, params) {
 
 // 自定义 axios get 方法
 export function spiderPut(url, params) {
-  console.log('spiderGet params', params)
+  console.log('spiderPut params', params)
   return service({
     url: url,
     method: 'put',
-    params: params
+    data: params
   })
 }
 // 封装 Dispatch
@@ -127,11 +127,13 @@ export function spiderDispatch(dispatchName, params, succeedCallback) {
     .dispatch(dispatchName, params)
     .then(result => {
       succeedCallback(result)
-      Message({
-        message: result.message,
-        type: result.messageType,
-        duration: 5 * 1000
-      })
+      if (result.message) {
+        Message({
+          message: result.message,
+          type: result.messageType,
+          duration: 5 * 1000
+        })
+      }
     })
     .catch(e => {
       Message({

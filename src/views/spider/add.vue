@@ -184,6 +184,12 @@ import {
 } from '@/utils/request'
 
 export default {
+  name: 'spiderAdd',
+  // 接受父组件的值
+  props: {
+    inputName: String,
+    required: true
+  },
   data() {
     return {
       activeName: 'SpiderBasic',
@@ -294,10 +300,6 @@ export default {
     submit() {
       this.$refs[this.activeName].validate((valid) => {
         if (valid) {
-
-          this.urlData.push({
-            ...this.form
-          })
           spiderDispatch('AddSpider', { ...this.form,
               Tags: this.form.Tags.join(';')
             },
@@ -308,33 +310,7 @@ export default {
                 this.startUrl.SpiderId = result.data
               }
             });
-
-          // this.$store.dispatch('AddSpider', { ...this.form,
-          //   Tags: this.form.Tags.join(';')
-          // }).then(() => {
-          //   const result = this.$store.state.spider.addSpiderResult
-          //   Message({
-          //     message: result.message,
-          //     type: result.messageType,
-          //     duration: 5 * 1000
-          //   })
-          //   if (result.succeed) {
-          //     this.$refs[this.activeName].resetFields();
-          //     this.activeName = 'StartUrl'
-          //     this.startUrl.SpiderId = result.data
-          //   }
-
-          // }).catch((e) => {
-          //   console.log(e)
-          //   Message({
-          //     message: e,
-          //     type: 'error',
-          //     duration: 5 * 1000
-          //   })
-          // })
-
         } else {
-          console.log('error submit!!');
           return false;
         }
       });
@@ -363,24 +339,10 @@ export default {
             })
             return
           }
-          this.$store.dispatch('AddSpiderStartUrls', postdata).then(() => {
-            const result = this.$store.state.spider.addSpiderStartUrlsResult
-            Message({
-              message: result.message,
-              type: result.messageType,
-              duration: 5 * 1000
-            })
+          spiderDispatch('AddSpiderStartUrls', postdata, (result) => {
             if (result.succeed)
               this.dialogVisible = false
-          }).catch((e) => {
-            console.log(e)
-            Message({
-              message: e,
-              type: 'error',
-              duration: 5 * 1000
-            })
-          })
-
+          });
         }
       });
     },
