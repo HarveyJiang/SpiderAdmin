@@ -1,6 +1,6 @@
 <template>
 <div>
-  <el-form :model="startUrlModel" ref="StartUrl">
+  <el-form :model="startUrlModel" :rules="rules" ref="StartUrl">
     <el-form-item label="爬取链接" :label-width="formLabelWidth" prop="url">
       <el-input v-model.trim="startUrlModel.url" auto-complete="off"></el-input>
     </el-form-item>
@@ -83,8 +83,8 @@
     </el-collapse>
   </el-form>
   <div slot="footer" class="dialog-footer">
-    <el-button @click="dialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="submit()">确 定</el-button>
+    <el-button @click="handlerCancel(false)">取 消</el-button>
+    <el-button type="primary" @click="submit">确 定</el-button>
   </div>
 </div>
 </template>
@@ -97,10 +97,17 @@ import {
   spiderDispatch
 } from '@/utils/request'
 
+import
+jsonEditor
+from '@/components/JsonEditor'
+
 export default {
   name: 'UrlConfig',
+  components: {
+    jsonEditor
+  },
   props: {
-    spiderId:Number,
+    spiderId: Number,
     startUrlId: Number,
     spiderType: Number
   },
@@ -118,7 +125,7 @@ export default {
         url: '',
         requestMethod: 'GET',
         requestEncoding: 'utf-8',
-        spiderId:this.spiderId
+        otherFields: ''
       },
       rules: {
         url: [{
@@ -143,22 +150,26 @@ export default {
           });
       }
     },
+    handlerCancel(refresh) {
+      this.$emit('refreshData', refresh);
+    },
     submit() {
       this.$refs['StartUrl'].validate((valid) => {
         if (valid) {
-          let otherFields = this.startUrlModel.OtherFields
+          let otherFields = this.startUrlModel.otherFields
           if (otherFields) {
-            otherFields = JSON.parse(this.startUrlModel.OtherFields)
+            otherFields = JSON.parse(this.startUrlModel.otherFields)
           }
           const fields = { ...otherFields,
             ...this.fieldsParams
           }
           const postdata = {
             ...this.startUrlModel,
-            RequestParams: JSON.stringify(this.startUrlModel.RequestParams),
-            FieldsParams: JSON.stringify(fields)
+            spiderId: this.spiderId,
+            requestParams: JSON.stringify(this.startUrlModel.requestParams),
+            fieldsParams: JSON.stringify(fields)
           }
-          delete postdata.OtherFields
+          delete postdata.otherFields
           if (!postdata.spiderId) {
             Message({
               message: '非法操作,请先添加爬虫基本信息。',
@@ -169,8 +180,12 @@ export default {
           }
           const action = this.startUrlId ? 'UpdateStartUrl' : 'AddSpiderStartUrls'
           spiderDispatch(action, postdata, (result) => {
-            if (result.succeed)
-              this.dialogVisible = false
+            if (result.succeed) {
+              this.handlerCancel(true)
+              if (action == 'AddSpiderStartUrls')
+                this.$refs['StartUrl'].resetFields();
+            }
+
           });
         }
       });

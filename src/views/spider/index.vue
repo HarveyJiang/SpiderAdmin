@@ -14,13 +14,13 @@
   <el-table :data="spiderData" border style="width: 100%">
     <el-table-column prop="name" label="名称" width="150">
     </el-table-column>
-    <el-table-column prop="spiderType" label="类型" width="120">
+    <el-table-column :formatter="formatterSpiderType" prop="spiderType" label="类型" width="120" :filters="spiderTypes" :filter-method="filterTag">
     </el-table-column>
-    <el-table-column prop="status" label="状态" width="120">
+    <el-table-column :formatter="formatterSpiderStatus" prop="status" label="状态" width="120" :filters="spiderStatus" :filter-method="filterTag">
     </el-table-column>
     <el-table-column label="操作" width="180">
       <template slot-scope="scope">
-        <el-button @click="handleClick(scope.row)" type="text" size="small">启动</el-button>
+        <el-button @click="handleClick(scope.row)" type="text">启动</el-button>
         <i class="el-icon-view" @click="handleView(scope.row)" title="查看"></i>
         <i class="el-icon-edit" title="编辑"></i>
         <i class="el-icon-delete" title="删除" @click="handleDelete(scope.row)"></i>
@@ -29,7 +29,7 @@
   </el-table>
   <el-pagination v-if="this.totalCount>0" :page-size="this.pageSize" @current-change="handleCurrentChange" layout="prev, pager, next" :total="this.totalCount" />
   <el-dialog title="查看 | 编辑" :visible.sync="dialogVisible" width="80%">
-    <SpiderBasic :spiderId="spiderId" :spiderType="spiderType" />
+    <SpiderAdd :spiderId="spiderId" :spiderType="spiderType" />
   </el-dialog>
 
 </div>
@@ -43,18 +43,31 @@ import {
   MessageBox,
   Dialog
 } from 'element-ui'
-
-import SpiderBasic from './components/spiderUrl'
+import {
+  spiderTypes,
+  spiderStatus
+} from '@/utils/config';
+import SpiderAdd from './add'
 
 export default {
   components: {
-    SpiderBasic
+    SpiderAdd
   },
   methods: {
-    childClick() {
-      this.$refs.child.$emit('childMethod') // 方法1
-      this.$refs.child.callMethod() // 方法2
+    formatterSpiderType(row, column) {
+      return spiderTypes[row.spiderType];
     },
+    formatterSpiderStatus(row, column) {
+      return spiderStatus[row.status];
+    },
+    // filterTag(value, row) {
+    //   return row.spiderType === value;
+    // },
+     filterTag(value, row, column) {
+        const property = column['property'];
+        console.log('property',property)
+        return row[property] === value;
+      },
     init(params) {
       spiderDispatch('GetSpiders', params, (result) => {
         this.spiderData = result.data
@@ -117,7 +130,19 @@ export default {
       pageSize: 10,
       spiderId: 0,
       spiderType: 0,
-      spiderData: []
+      spiderData: [],
+      spiderStatus: spiderStatus.map((v, i, arr) => {
+        return {
+          "text": v,
+          "value": i
+        }
+      }),
+      spiderTypes: spiderTypes.map((v, i, arr) => {
+        return {
+          "text": v,
+          "value": i
+        }
+      }),
     }
   }
 }

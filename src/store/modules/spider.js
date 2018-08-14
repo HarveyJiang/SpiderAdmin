@@ -7,7 +7,8 @@ import {
   updateSpider,
   getStartUrlsBySpiderId,
   getStartUrl,
-  updateStartUrl
+  updateStartUrl,
+  deleteStartUrl
 } from '@/api/spider'
 import { spiderPromise } from '@/utils/request'
 
@@ -79,6 +80,14 @@ const spider = {
     UpdateStartUrl({ commit }, payload) {
       return spiderPromise(
         updateStartUrl,
+        payload,
+        commit,
+        'ADD_SPIDER_STARTURLS_RESULT'
+      )
+    },
+    DeleteStartUrl({ commit }, payload) {
+      return spiderPromise(
+        deleteStartUrl,
         payload,
         commit,
         'ADD_SPIDER_STARTURLS_RESULT'

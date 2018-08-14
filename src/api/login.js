@@ -1,4 +1,4 @@
-import { spiderPost, spiderGet } from './../utils/request'
+import { spiderPost, spiderGet } from '../utils/request'
 
 // export function login(username, password) {
 //   return request({

@@ -33,6 +33,10 @@ export function getStartUrl(params) {
 export function updateStartUrl(params) {
   return spiderPut('/spider_starturl', params)
 }
+export function deleteStartUrl(params) {
+  return spiderDelete(`/spider_starturl/${params.id}`)
+}
+
 export function getStartUrlsBySpiderId(params) {
   const spiderId = params.spiderId
   return spiderGet(`/spider_starturl/spider/${spiderId}/starturls`, params)

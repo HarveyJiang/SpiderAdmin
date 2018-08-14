@@ -34,7 +34,6 @@ export default {
   name: 'SpiderScrapy',
   props: {
     spiderId: Number,
-    required: false
   },
   watch: {
     spiderId: function () {

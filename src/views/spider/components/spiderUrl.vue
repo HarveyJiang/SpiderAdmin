@@ -9,21 +9,21 @@
     </el-table-column>
     <el-table-column label="操作" :render-header="renderHeader" width="100">
       <template slot-scope="scope">
-        <el-button @click="handleView(scope.row)" type="text" size="small">查看</el-button>
-        <el-button type="text" size="small">编辑</el-button>
+        <el-button @click="handleView(scope.row)" type="text" size="small">编辑</el-button>
+        <el-button type="text"><i class="el-icon-delete" title="删除" @click="handleDelete(scope.row)"></i></el-button>
       </template>
     </el-table-column>
   </el-table>
 
   <el-dialog append-to-body title="添加" :visible.sync="dialogVisible" width="80%">
-    <UrlConfig :startUrlId="startUrlId" :spiderType="spiderType" :spiderId="spiderId" />
+    <UrlConfig :startUrlId="startUrlId" :spiderType="spiderType" :spiderId="spiderId" @refreshData="refreshData" />
   </el-dialog>
 </div>
 </template>
 
 <script>
 import {
-  Message
+  Message,MessageBox
 } from 'element-ui'
 import {
   spiderDispatch
@@ -68,10 +68,35 @@ export default {
           });
       }
     },
+    refreshData(refresh) {
+      // 子组件urlConfig添加成功后，隐藏弹出框，并刷新数据
+      this.dialogVisible = false
+      if (refresh) {
+        this.init()
+      }
+
+    },
     handleView(row) {
       this.startUrlId = row.id
       console.log('startUrlId' + this.startUrlId, this.spiderType)
       this.dialogVisible = true
+    },
+    handleDelete(row) {
+      MessageBox.confirm('确定删除:' + row.url, '警告', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        spiderDispatch('DeleteStartUrl', {
+          id: row.id
+        }, (result) => {
+          if (result.succeed) {
+            this.init()
+          }
+        })
+      }).catch(() => {
+        return false
+      });
     },
     renderHeader(createElement, {
       column

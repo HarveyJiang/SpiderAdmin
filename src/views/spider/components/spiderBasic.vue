@@ -1,17 +1,16 @@
 <template>
 <div>
   <el-form :model="spiderModel" :rules="rules" ref="SpiderBasic">
-    <el-form-item label="名称" :label-width="formLabelWidth" prop="Name">
+    <el-form-item label="名称" :label-width="formLabelWidth" prop="name">
       <el-input v-model.trim="spiderModel.name" auto-complete="off"></el-input>
     </el-form-item>
     <el-form-item label="仅域名" :label-width="formLabelWidth">
       <el-switch v-model="spiderModel.allowedDomain"></el-switch>
     </el-form-item>
     <el-form-item label="类别" :label-width="formLabelWidth">
-      <el-select v-model="spiderModel.spiderType" placeholder="爬虫类别">
-        <el-option label="列表-详情" value="1"></el-option>
-        <el-option label="详情" value="2"></el-option>
-        <el-option label="链接" value="3"></el-option>
+      <el-select v-model.number="spiderModel.spiderType" placeholder="爬虫类别">
+        <el-option v-for="( item, index ) in spiderTypes" :key="index" :label="item" :value="index+1">
+        </el-option>
       </el-select>
     </el-form-item>
     <el-form-item label="标签" :label-width="formLabelWidth">
@@ -20,7 +19,7 @@
     </el-form-item>
   </el-form>
   <div slot="footer" class="dialog-footer">
-    <el-button @click="dialogFormVisible = false">取 消</el-button>
+    <el-button @click="this.dialogFormVisible = false">取 消</el-button>
     <el-button type="primary" @click="submit()">确 定</el-button>
   </div>
 </div>
@@ -34,13 +33,16 @@ import {
   spiderDispatch
 } from '@/utils/request'
 
+import {
+  spiderTypes
+} from '@/utils/config';
+
 export default {
   name: 'SpiderBasic',
   props: {
     spiderId: Number,
-    required: false
   },
-  
+
   watch: {
     spiderId: function () {
       this.init()
@@ -51,9 +53,10 @@ export default {
       formLabelWidth: '120px',
       dialogFormVisible: false,
       spiderModel: {
-        spiderType: '2',
+        spiderType: 3,
         tags: []
       },
+      spiderTypes: spiderTypes,
       rules: {
         name: [{
           required: true,
@@ -102,13 +105,9 @@ export default {
     console.log('init', this.spiderId)
     this.init()
   },
-  // mounted: function () {
-  //   this.$nextTick(function () {
-  //     this.$on('childMethod', function () {
-  //       console.log('监听成功')
-  //     })
-  //   })
-  // }
+  mounted: function () {
+    console.log(spiderTypes)
+  }
 
 }
 </script>
