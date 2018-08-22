@@ -23,25 +23,32 @@
         <el-input type="textarea" :rows="2" placeholder="请输入请求参数" v-model="startUrlModel.requestParams">
         </el-input>
       </el-collapse-item>
+      <el-collapse-item v-if="spiderType==0">
+        <template slot="title">
+          列表设置
+          <i class="header-icon el-icon-info"></i>
+        </template>
+        <el-form-item label="列表项" :label-width="formLabelWidth">
+          <el-input v-model.trim="startUrlModel.listInfo.listXpath"></el-input>
+        </el-form-item>
+        <el-form-item label="详情链接" :label-width="formLabelWidth">
+          <el-input v-model.trim="startUrlModel.listInfo.detailXpath"></el-input>
+        </el-form-item>
+      </el-collapse-item>
       <el-collapse-item>
         <template slot="title">
-          字段设置<i class="header-icon el-icon-info"></i>
+          属性提取设置<i class="header-icon el-icon-info"></i>
         </template>
-        <el-form-item label="标题" :label-width="formLabelWidth">
-          <el-input v-model.trim="fieldsParams.title"></el-input>
+        <el-form-item v-if="spiderType==0" label="列表项目属性" :label-width="formLabelWidth">
+          <el-input type="textarea" :rows="2" placeholder="列表项目属性:{key:value}" v-model="startUrlModel.listFields">
+          </el-input>
         </el-form-item>
-        <el-form-item label="正文" :label-width="formLabelWidth">
-          <el-input v-model.trim="fieldsParams.content"></el-input>
-        </el-form-item>
-        <el-form-item label="时间" :label-width="formLabelWidth">
-          <el-input v-model.trim="fieldsParams.time"></el-input>
-        </el-form-item>
-        <el-form-item label="其他字段" :label-width="formLabelWidth">
-          <el-input type="textarea" :rows="2" placeholder="请输入其他字段:{key:value}" v-model="startUrlModel.otherFields">
+        <el-form-item label="详情页属性" :label-width="formLabelWidth">
+          <el-input type="textarea" :rows="2" placeholder="列表项目属性:{key:value}" v-model="startUrlModel.detailFields">
           </el-input>
         </el-form-item>
       </el-collapse-item>
-      <el-collapse-item v-if="spiderType==3">
+      <el-collapse-item v-if="spiderType==2">
         <template slot="title">
           规则设置
           <i class="header-icon el-icon-info"></i>
@@ -53,31 +60,20 @@
           <el-input></el-input>
         </el-form-item>
       </el-collapse-item>
-      <el-collapse-item v-if="spiderType==1">
-        <template slot="title">
-          列表设置
-          <i class="header-icon el-icon-info"></i>
-        </template>
-        <el-form-item label="列表项" :label-width="formLabelWidth">
-          <el-input v-model.trim="fieldsParams.listXpath"></el-input>
-        </el-form-item>
-        <el-form-item label="详情链接" :label-width="formLabelWidth">
-          <el-input v-model.trim="fieldsParams.detailXpath"></el-input>
-        </el-form-item>
-      </el-collapse-item>
-      <el-collapse-item v-if="spiderType==1">
+
+      <el-collapse-item v-if="spiderType==0">
         <template slot="title">
           分页设置
           <i class="header-icon el-icon-info"></i>
         </template>
         <el-form-item label="总页码" :label-width="formLabelWidth">
-          <el-input v-model.trim="fieldsParams.totalPageXpathOrNum"></el-input>
+          <el-input v-model.trim="startUrlModel.pageInfo.totalPageXpathOrNum"></el-input>
         </el-form-item>
         <el-form-item label="当前页" :label-width="formLabelWidth">
-          <el-input v-model.trim="fieldsParams.currentPageXpath"></el-input>
+          <el-input v-model.trim="startUrlModel.pageInfo.currentPageXpath"></el-input>
         </el-form-item>
         <el-form-item label="分页参数名称" :label-width="formLabelWidth">
-          <el-input v-model.trim="fieldsParams.pageParamName"></el-input>
+          <el-input v-model.trim="startUrlModel.pageInfo.pageParamName"></el-input>
         </el-form-item>
       </el-collapse-item>
     </el-collapse>
@@ -119,13 +115,17 @@ export default {
   },
   data() {
     return {
-      fieldsParams: {},
+      // fieldsParams: {},
       formLabelWidth: '120px',
       startUrlModel: {
         url: '',
         requestMethod: 'GET',
         requestEncoding: 'utf-8',
-        otherFields: ''
+        requestParams: '',
+        pageInfo: {},
+        listInfo: {},
+        listFields: '',
+        detailFields: '',
       },
       rules: {
         url: [{
@@ -146,6 +146,11 @@ export default {
           (result) => {
             if (result.succeed) {
               this.startUrlModel = result.data
+              // this.fieldsInfo = JSON.parse(result.data.fieldsInfo || '{}')
+              this.startUrlModel.pageInfo = JSON.parse(this.startUrlModel.pageInfo || '{}')
+              this.startUrlModel.listInfo = JSON.parse(this.startUrlModel.listInfo || '{}')
+              // this.pageInfo = JSON.parse(result.data.pageInfo || '{}')
+              // this.listInfo = JSON.parse(result.data.listInfo || '{}')
             }
           });
       }
@@ -156,20 +161,37 @@ export default {
     submit() {
       this.$refs['StartUrl'].validate((valid) => {
         if (valid) {
-          let otherFields = this.startUrlModel.otherFields
-          if (otherFields) {
-            otherFields = JSON.parse(this.startUrlModel.otherFields)
+
+          try {
+            JSON.parse(this.startUrlModel.requestParams || '{}')
+          } catch (error) {
+            Message({
+              message: 'requestParams json格式错误。',
+              type: 'error',
+              duration: 5 * 1000
+            })
+            return
           }
-          const fields = { ...otherFields,
-            ...this.fieldsParams
+          let listFields = {}
+          try {
+            listFields = JSON.parse(this.startUrlModel.listFields || '{}')
+          } catch (error) {
+            Message({
+              message: 'listFields json格式错误。',
+              type: 'error',
+              duration: 5 * 1000
+            })
+            return
           }
           const postdata = {
             ...this.startUrlModel,
             spiderId: this.spiderId,
-            requestParams: JSON.stringify(this.startUrlModel.requestParams),
-            fieldsParams: JSON.stringify(fields)
+            pageInfo: JSON.stringify(this.startUrlModel.pageInfo || '{}'),
+            listInfo: JSON.stringify(this.startUrlModel.listInfo || '{}'),
+            // listFields: JSON.stringify(this.startUrlModel.listFields || '{}'),
+            // detailFields: JSON.stringify(this.startUrlModel.detailFields || '{}'),
           }
-          delete postdata.otherFields
+          // delete postdata.otherFields
           if (!postdata.spiderId) {
             Message({
               message: '非法操作,请先添加爬虫基本信息。',

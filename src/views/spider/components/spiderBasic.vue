@@ -9,7 +9,7 @@
     </el-form-item>
     <el-form-item label="类别" :label-width="formLabelWidth">
       <el-select v-model.number="spiderModel.spiderType" placeholder="爬虫类别">
-        <el-option v-for="( item, index ) in spiderTypes" :key="index" :label="item" :value="index+1">
+        <el-option v-for="( item, index ) in spiderTypes" :key="index" :label="item" :value="index">
         </el-option>
       </el-select>
     </el-form-item>
