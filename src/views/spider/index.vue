@@ -20,7 +20,8 @@
     </el-table-column>
     <el-table-column label="操作" width="180">
       <template slot-scope="scope">
-        <el-button @click="handleClick(scope.row)" type="text">启动</el-button>
+        <el-button @click="handleRun(scope.row,'等待')" v-if="scope.row.status!=2" type="text">启动</el-button>
+        <el-button @click="handleRun(scope.row,'停止')" v-if="scope.row.status==2||scope.row.status==1" type="text">停止</el-button>
         <i class="el-icon-view" @click="handleView(scope.row)" title="查看"></i>
         <i class="el-icon-edit" title="编辑"></i>
         <i class="el-icon-delete" title="删除" @click="handleDelete(scope.row)"></i>
@@ -39,6 +40,9 @@
 import {
   spiderDispatch
 } from '@/utils/request'
+
+import {sendMessage} from '@/utils/signalr_vue'
+
 import {
   MessageBox,
   Dialog
@@ -48,6 +52,7 @@ import {
   spiderStatus
 } from '@/utils/config';
 import SpiderAdd from './add'
+
 
 export default {
   components: {
@@ -63,12 +68,13 @@ export default {
     // filterTag(value, row) {
     //   return row.spiderType === value;
     // },
-     filterTag(value, row, column) {
-        const property = column['property'];
-        console.log('property',property)
-        return row[property] === value;
-      },
+    filterTag(value, row, column) {
+      const property = column['property'];
+      console.log('property', property)
+      return row[property] === value;
+    },
     init(params) {
+      sendMessage()
       spiderDispatch('GetSpiders', params, (result) => {
         this.spiderData = result.data
         this.totalCount = result.count
@@ -106,8 +112,18 @@ export default {
       }
       this.init(p)
     },
-    handleClick(row) {
+    run(row) {
+      row.status = spiderStatus.indexOf('等待')
       console.log(row)
+      spiderDispatch('UpdateSpider', row,
+        (result) => {});
+    },
+    handleRun(row, status) {
+      // this.showStop = !this.showStop
+      // this.showText = this.showStop ? '启动' : '停止'
+      row.status = spiderStatus.indexOf(status)
+      spiderDispatch('UpdateSpider', row,
+        (result) => {});
     },
     search() {
       const p = {
@@ -131,6 +147,8 @@ export default {
       spiderId: 0,
       spiderType: 0,
       spiderData: [],
+      showStop: false,
+      showText: '启动',
       spiderStatus: spiderStatus.map((v, i, arr) => {
         return {
           "text": v,

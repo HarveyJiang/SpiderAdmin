@@ -13,6 +13,7 @@
     "test": "npm run lint"
   },
   "dependencies": {
+    "@aspnet/signalr": "^1.0.3",
     "axios": "0.17.1",
     "codemirror": "5.32.0",
     "element-ui": "2.3.4",
@@ -21,6 +22,7 @@
     "normalize.css": "7.0.0",
     "nprogress": "0.2.0",
     "script-loader": "^0.7.2",
+    "tslib": "^1.9.3",
     "vue": "2.5.10",
     "vue-router": "3.0.1",
     "vuex": "3.0.1"

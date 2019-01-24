@@ -66,11 +66,11 @@
           分页设置
           <i class="header-icon el-icon-info"></i>
         </template>
-        <el-form-item label="总页码" :label-width="formLabelWidth">
-          <el-input v-model.trim="startUrlModel.pageInfo.totalPageXpathOrNum"></el-input>
+        <el-form-item label="下一页" :label-width="formLabelWidth">
+          <el-input v-model.trim="startUrlModel.pageInfo.nextPageXpath"></el-input>
         </el-form-item>
-        <el-form-item label="当前页" :label-width="formLabelWidth">
-          <el-input v-model.trim="startUrlModel.pageInfo.currentPageXpath"></el-input>
+        <el-form-item label="最大爬取页码" :label-width="formLabelWidth">
+          <el-input v-model.trim="startUrlModel.pageInfo.maxPageCount"></el-input>
         </el-form-item>
         <el-form-item label="分页参数名称" :label-width="formLabelWidth">
           <el-input v-model.trim="startUrlModel.pageInfo.pageParamName"></el-input>
@@ -121,7 +121,7 @@ export default {
         url: '',
         requestMethod: 'GET',
         requestEncoding: 'utf-8',
-        requestParams: '',
+        requestParams: '{}',
         pageInfo: {},
         listInfo: {},
         listFields: '',
